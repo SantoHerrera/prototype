@@ -2,24 +2,14 @@
   (:gen-class)
   (:require [cheshire.core :refer :all]))
 
-; (ns my.ns
-;   (:require [cheshire.core :refer :all]))
-
-; (ns cp
-;   (:require [lanterna]))
-;
-
-;needs create user fun
-;create catagory
-;add book
-;create list
-;
 
 (def data-base
   {:nameHere {:allBooks ["harry potter" "twilight" "hunger games" "hunger games 2" "hunger games 3"]
               :horror ["hunger games" "hunger games 2" "hunger games 3"]
               :love ["twilight"]
-              :count 3}})
+              :count 3}
+   :secondUser {:allBooks ["book 1" "book 2" "book 3"]
+                :horror ["book 1" "book 2"]}})
 
 (def empty-data-base {})
 
@@ -39,8 +29,18 @@
   [data user catagory book]
   (update-in data [(keyword user) (keyword catagory)] conj book))
 
+(defn delete-user
+  [data user]
+  (dissoc data (keyword user)))
 
+(defn delete-user-catagory
+  [data user catagory]
+  (update-in data [(keyword user)] #(dissoc % (keyword catagory))))
 
+(defn delete-book-in-catagory
+  [data user catagory book]
+  (assoc-in data [(keyword user) (keyword catagory)]
+    (into [] (remove #{book} (get-in data [(keyword user) (keyword catagory)])))))
 
 
 (defn call
@@ -90,17 +90,31 @@
   [arr]
   (run! println arr))
 
-(defn mainV2
+;make main with cond
+
+(defn main
   [data]
   (loop [data-base data
          input ""]
     (print-array available-functions)
     (println "what would you like to do? - make sure of no spelling errors")
-    (when (does-function-exists available-functions input) (println "calls function"))
+    (when (does-function-exists available-functions input) (return-JSON (get-user-catagory data-base "nameHere" "horror")))
     (if (= input "e")
      (println (generate-string data {:pretty true}))
      (recur data (get-input)))))
 
+
+(defn mainV3
+  [data]
+  (loop [data-base data
+         input ""]
+    (print-array available-functions)
+    (println "what would you like to do? - make sure of no spelling errors")
+    (when (does-function-exists available-functions input) (return-JSON (get-user-catagory data-base "nameHere" "horror")))
+    (cond
+      (= input "e") (println (generate-string data {:pretty true}))
+      (= input "get-user") (return-JSON (get-user data-base (read-line)))
+      :else (recur data (get-input)))))
 
 
 
@@ -108,3 +122,21 @@
    "I don't do a whole lot ... yet."
    [& args]
    (main))
+
+
+
+
+
+(defn return-JSON
+  [data]
+  (generate-string data))
+
+
+(defn get-user
+  [data user]
+  ((keyword user) data))
+
+
+(defn get-user-catagory
+  [data user catagory]
+  ((keyword catagory) ((keyword user) data)))
