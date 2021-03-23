@@ -1,6 +1,12 @@
 (ns goodread.core
-  (:gen-class)
-  (:require [cheshire.core :refer :all]))
+  (:require [org.httpkit.server :as server]
+            [compojure.core :refer :all]
+            [compojure.route :as route]
+            [ring.middleware.defaults :refer :all]
+            [clojure.pprint :as pp]
+            [clojure.string :as str]
+            [cheshire.core :refer :all])
+  (:gen-class))
 
 (def data-base
   {:nameHere {:allBooks ["harry potter" "twilight" "hunger games" "hunger games 2" "hunger games 3"]
@@ -124,18 +130,35 @@
 
 
 
+(start-server)
+
+
+(defn start-server
+  "This is our main entry point"
+  [& args]
+  (let [port (Integer/parseInt (or (System/getenv "PORT") "3000"))]
+; Run the server with Ring.defaults middleware
+   ;(server/run-server (wrap-defaults #'app-routes site-defaults) {:port port})
+; Run the server without ring defaults
+   (server/run-server #'app-routes {:port port})
+   (println (str "Running webserver at http:/127.0.0.1:" port "/"))))
 
 
 
+(defroutes app-routes
+  ;(GET "/" [] simple-body-page)
+  ;(GET "/request" [] request-example)
+  ;(GET "/hello" [] hello-name)
+  (GET "/people" [] people-handler)
+  ;(GET "/people/add" [] addperson-handler)
+  (route/not-found "Error, page not found!"))
 
 
 
-
-
-
-
-
-
+(defn people-handler [req]
+    {:status  200
+     :headers {"Content-Type" "text/json"}
+     :body    (return-JSON data-base)})
 
 
 
