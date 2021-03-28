@@ -1,5 +1,6 @@
 (ns goodread.core
-  (:require [org.httpkit.server :as server]
+  (:require [goodread.view :as views]
+            [org.httpkit.server :as server]
             [compojure.core :refer :all]
             [compojure.route :as route]
             [ring.middleware.defaults :refer :all]
@@ -130,7 +131,29 @@
 
 
 
-(start-server)
+
+
+(defn people-handler [req]
+    {:status  200
+     :headers {"Content-Type" "text/json"}
+     :body    (return-JSON data-base)})
+
+
+
+(defroutes app-routes
+  ;(GET "/" [] simple-body-page)
+  ;(GET "/request" [] request-example)
+  ;(GET "/hello" [] hello-name)
+  (GET "/people" [] people-handler)
+  (GET "/home" [] (views/home-page2))
+  (GET "/login" [] (views/login-page))
+  (GET "/register" [] (views/register-account-page))
+  ;(GET "/people/add" [] addperson-handler)
+  (route/not-found "Error, page not found!"))
+
+
+
+
 
 
 (defn start-server
@@ -143,23 +166,11 @@
    (server/run-server #'app-routes {:port port})
    (println (str "Running webserver at http:/127.0.0.1:" port "/"))))
 
+(start-server)
 
 
-(defroutes app-routes
-  ;(GET "/" [] simple-body-page)
-  ;(GET "/request" [] request-example)
-  ;(GET "/hello" [] hello-name)
-  (GET "/people" [] people-handler)
-  ;(GET "/people/add" [] addperson-handler)
-  (route/not-found "Error, page not found!"))
-
-
-
-(defn people-handler [req]
-    {:status  200
-     :headers {"Content-Type" "text/json"}
-     :body    (return-JSON data-base)})
-
+(comment
+ (start-server))
 
 
 
